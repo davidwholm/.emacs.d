@@ -23,6 +23,10 @@
   :init
   (modus-themes-load-operandi))
 
+(use-package comp
+  :custom
+  (native-comp-async-report-warnings-errors nil))
+
 (use-package paren
   :init
   (show-paren-mode t))
@@ -32,10 +36,45 @@
   :init
   (vertico-mode))
 
+(use-package orderless
+  :straight t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+
 (use-package consult
   :straight t
   :bind
   ([remap switch-to-buffer] . consult-buffer))
+
+(use-package lsp-mode
+  :straight t)
+
+(use-package consult-lsp
+  :straight t)
+
+(use-package flycheck
+  :straight t
+  :hook
+  (prog-mode . flycheck-mode))
+
+(use-package consult-flycheck
+  :straight t)
+
+(use-package corfu
+  :straight t
+  :init
+  (global-corfu-mode))
+
+(use-package marginalia
+  :straight t
+  :init
+  (marginalia-mode))
+
+(use-package embark
+  :straight t
+  :bind
+  ("C-;" . embark-act))
 
 (use-package scroll-bar
   :custom
@@ -43,16 +82,40 @@
 
 (use-package faces
   :config
-  (set-face-attribute 'default nil :font "Iosevka"))
+  (set-face-attribute 'default nil :font "Iosevka" :height 120))
 
 (use-package cc-vars
   :custom
   (c-basic-offset 4))
 
+(use-package tree-sitter
+  :straight t)
+
+(use-package tree-sitter-langs
+  :straight t)
+
 (use-package sly
   :straight t
   :custom
   (inferior-lisp-program "sbcl"))
+
+(use-package vundo
+  :straight t)
+
+(use-package org
+  :straight t)
+
+(use-package org-modern
+  :straight t
+  :init
+  (global-org-modern-mode))
+
+(use-package tempel
+  :straight t
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert))
+  :init
+  (global-tempel-abbrev-mode))
 
 (custom-set-variables
  '(truncate-lines t)
