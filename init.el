@@ -80,9 +80,16 @@
   :custom
   (scroll-bar-mode nil))
 
-(use-package faces
-  :config
-  (set-face-attribute 'default nil :font "Iosevka" :height 120))
+(use-package cus-face
+  :init
+  (custom-set-faces
+   '(variable-pitch ((t (:family "Iosevka Aile" :height 120))))
+   '(default ((t (:family "Iosevka" :height 120))))))
+
+(use-package minions
+  :straight t
+  :init
+  (minions-mode))
 
 (use-package cc-vars
   :custom
@@ -102,8 +109,33 @@
 (use-package vundo
   :straight t)
 
+(use-package ibuffer
+  :bind
+  ("C-x C-b" . (lambda ()
+		 (interactive)
+		 (ibuffer 'other-window))))
+
 (use-package org
-  :straight t)
+  :straight t
+  :custom
+ (org-auto-align-tags nil)
+ (org-tags-column 0)
+ (org-catch-invisible-edits 'show-and-error)
+ (org-special-ctrl-a/e t)
+ (org-insert-heading-respect-content t)
+ (org-hide-emphasis-markers t)
+ (org-pretty-entities t)
+ (org-ellipsis "…"))
+
+(use-package org-agenda
+  :custom
+  ( org-agenda-block-separator ?─)
+  (org-agenda-time-grid
+   '((daily today require-timed)
+     (800 1000 1200 1400 1600 1800 2000)
+     " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"))
+  (org-agenda-current-time-string
+   "⭠ now ─────────────────────────────────────────────────"))
 
 (use-package org-modern
   :straight t
@@ -112,7 +144,7 @@
 
 (use-package tempel
   :straight t
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+  :bind (("M-+" . tempel-complete)
          ("M-*" . tempel-insert))
   :init
   (global-tempel-abbrev-mode))
