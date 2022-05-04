@@ -13,6 +13,30 @@
 
 (straight-use-package 'use-package)
 
+(add-to-list 'load-path (concat user-emacs-directory "lisp"))
+
+(use-package recentf
+  :init
+  (recentf-mode))
+
+(use-package elec-pair
+  :disabled
+  :init
+  (electric-pair-mode))
+
+(use-package paredit
+  :straight t
+  :hook
+  (scheme-mode . paredit-mode)
+  (lisp-mode . paredit-mode))
+
+(use-package darwin
+  :when (eq system-type 'darwin))
+
+(use-package pixel-scroll
+  :init
+  (pixel-scroll-mode))
+
 (use-package modus-themes
   :straight t
   :custom
@@ -23,9 +47,29 @@
   :init
   (modus-themes-load-operandi))
 
+(use-package so-long
+  :init
+  (global-so-long-mode))
+
+(use-package mood-line
+  :straight t
+  :init
+  (mood-line-mode))
+
+(use-package tab-bar
+  :custom
+  (tab-bar-new-tab-choice "*scratch*")
+  :init
+  (tab-bar-mode))
+
 (use-package comp
   :custom
   (native-comp-async-report-warnings-errors nil))
+
+(use-package gcmh
+  :straight t
+  :init
+  (gcmh-mode))
 
 (use-package paren
   :init
@@ -47,19 +91,13 @@
   :bind
   ([remap switch-to-buffer] . consult-buffer))
 
-(use-package lsp-mode
+(use-package eglot
   :straight t)
 
-(use-package consult-lsp
-  :straight t)
-
-(use-package flycheck
+(use-package flymake
   :straight t
   :hook
-  (prog-mode . flycheck-mode))
-
-(use-package consult-flycheck
-  :straight t)
+  (prog-mode . flymake-mode))
 
 (use-package corfu
   :straight t
@@ -83,10 +121,11 @@
 (use-package cus-face
   :init
   (custom-set-faces
-   '(variable-pitch ((t (:family "Iosevka Aile" :height 120))))
-   '(default ((t (:family "Iosevka" :height 120))))))
+   '(variable-pitch ((t (:family "Iosevka Aile" :height 160))))
+   '(default ((t (:family "Iosevka" :height 160))))))
 
 (use-package minions
+  :disabled
   :straight t
   :init
   (minions-mode))
@@ -95,39 +134,64 @@
   :custom
   (c-basic-offset 4))
 
-(use-package tree-sitter
+(use-package pyvenv
   :straight t)
 
+(use-package tree-sitter
+  :straight t
+  :hook
+  (python-mode . tree-sitter-mode))
+
 (use-package tree-sitter-langs
-  :straight t)
+  :straight t
+  :hook
+  (tree-sitter-after-on . tree-sitter-hl-mode))
 
 (use-package sly
   :straight t
   :custom
   (inferior-lisp-program "sbcl"))
 
-(use-package vundo
+(use-package geiser
   :straight t)
 
-(use-package ibuffer
-  :bind
-  ("C-x C-b" . (lambda ()
-		 (interactive)
-		 (ibuffer 'other-window))))
+(use-package geiser-guile
+  :straight t)
+
+(use-package racket-mode
+  :straight t
+  :hook
+  (racket-mode . racket-xp-mode))
+
+(use-package vundo
+  :straight t)
 
 (use-package org
   :straight t
   :custom
- (org-auto-align-tags nil)
- (org-tags-column 0)
- (org-catch-invisible-edits 'show-and-error)
- (org-special-ctrl-a/e t)
- (org-insert-heading-respect-content t)
- (org-hide-emphasis-markers t)
- (org-pretty-entities t)
- (org-ellipsis "…"))
+  (org-auto-align-tags nil)
+  (org-tags-column 0)
+  (org-catch-invisible-edits 'show-and-error)
+  (org-special-ctrl-a/e t)
+  (org-insert-heading-respect-content t)
+  (org-hide-emphasis-markers t)
+  ; (org-pretty-entities t)
+  (org-ellipsis "…")
+  (org-directory "~/Documents/org"))
+
+(use-package org-capture
+  :custom
+  (org-capture-templates
+   `(("j" "Journal Entry"
+      entry (file+datetree ,(concat org-directory "/journal.org"))
+      "* %?"
+      :empty-lines 1)))
+  :bind
+  ("C-c o c" . org-capture))
 
 (use-package org-agenda
+  :bind
+  ("C-c o a" . org-agenda)
   :custom
   ( org-agenda-block-separator ?─)
   (org-agenda-time-grid
@@ -149,8 +213,43 @@
   :init
   (global-tempel-abbrev-mode))
 
+(use-package python
+  :custom
+  (python-indent-offset 4))
+
+(use-package magit
+  :straight t)
+
+(use-package magit-delta
+  :straight t
+  :hook
+  (magit-mode . magit-delta-mode))
+
 (custom-set-variables
- '(truncate-lines t)
- '(ring-bell-function 'ignore)
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(bidi-display-reordering 'left-to-right t)
+ '(cursor-in-non-selected-windows nil)
+ '(highlight-nonselected-windows nil)
+ '(inhbit-splash-screen t)
  '(menu-bar-mode nil)
- '(tool-bar-mode nil))
+ '(org-fold-catch-invisible-edits 'show-and-error nil nil "Customized with use-package org")
+ '(ring-bell-function 'ignore)
+ '(safe-local-variable-values '((flycheck-clang-language-standard . "c++17")))
+ '(tool-bar-mode nil)
+ '(indent-tabs-mode nil)
+ '(truncate-lines t))
+
+(global-set-key (kbd "M-o") #'other-window)
+
+(provide 'init)
+;;; init.el ends here.
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:family "Iosevka" :height 140))))
+ '(variable-pitch ((t (:family "Iosevka Aile" :height 140)))))
