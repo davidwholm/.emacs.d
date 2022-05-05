@@ -30,6 +30,12 @@
   (scheme-mode . paredit-mode)
   (lisp-mode . paredit-mode))
 
+(use-package ibuffer
+  :bind
+  ("C-x C-b" . (lambda ()
+                 (interactive)
+                 (ibuffer 'other-window))))
+
 (use-package darwin
   :when (eq system-type 'darwin))
 
@@ -101,6 +107,36 @@
 
 (use-package corfu
   :straight t
+  :custom
+  (corfu-auto t)
+  (corfu-preselect-first nil)
+  (corfu-cycle t)
+  :hook
+  (minibuffer-setup . (lambda ()
+                        (when (where-is-internal #'completion-at-point (list (current-local-map)))
+                          (corfu-mode))))
+  (eshell-mode . (lambda ()
+                   (setq-local corfu-auto nil)
+                   (corfu-mode)))
+  :config
+  (advice-add #'corfu-insert :after (lambda (&rest _)
+                                      (cond
+                                       ((and (derived-mode-p 'eshell-mode) (fboundp 'eshell-send-input))
+                                        (eshell-send-input))
+                                       ((and (derived-mode-p 'comint-mode) (fboundp 'comint-send-input))
+                                        (comint-send-input)))))
+  :bind
+  (:map corfu-map
+        ("TAB" . corfu-next)
+        ([tab] . corfu-next)
+        ("S-TAB" . corfu-previous)
+        ([backtab] . corfu-previous)
+        ("M-m" . (lambda ()
+                   (interactive)
+                   (let ((completion-extra-properties corfu--extra)
+                         (completion-cycle-threshold nil)
+                         (completion-cycling nil))
+                     (apply #'consult-completion-in-region completion-in-region--data)))))
   :init
   (global-corfu-mode))
 
@@ -240,16 +276,11 @@
  '(safe-local-variable-values '((flycheck-clang-language-standard . "c++17")))
  '(tool-bar-mode nil)
  '(indent-tabs-mode nil)
+ '(tab-always-indent 'complete)
  '(truncate-lines t))
 
 (global-set-key (kbd "M-o") #'other-window)
 
 (provide 'init)
 ;;; init.el ends here.
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:family "Iosevka" :height 140))))
- '(variable-pitch ((t (:family "Iosevka Aile" :height 140)))))
+
