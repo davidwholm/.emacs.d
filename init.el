@@ -19,16 +19,13 @@
   :init
   (recentf-mode))
 
-(use-package elec-pair
-  :disabled
-  :init
-  (electric-pair-mode))
-
-(use-package paredit
-  :straight t
+(use-package display-line-numbers
   :hook
-  (scheme-mode . paredit-mode)
-  (lisp-mode . paredit-mode))
+  (prog-mode . display-line-numbers-mode))
+
+(use-package elec-pair
+  :hook
+  (prog-mode . electric-pair-mode))
 
 (use-package ibuffer
   :bind
@@ -51,16 +48,21 @@
 			      (selection . (semibold accented intense))
 			      (popup . (accented))))
   :init
-  (modus-themes-load-operandi))
+  (modus-themes-load-vivendi))
 
 (use-package so-long
   :init
   (global-so-long-mode))
 
-(use-package mood-line
+(use-package doom-modeline
   :straight t
+  :custom
+  (doom-modeline-icon nil)
   :init
-  (mood-line-mode))
+  (doom-modeline-mode))
+
+(use-package all-the-icons
+  :straight t)
 
 (use-package tab-bar
   :custom
@@ -102,6 +104,8 @@
 
 (use-package flymake
   :straight t
+  :custom
+  (flymake-fringe-indicator-position nil)
   :hook
   (prog-mode . flymake-mode))
 
@@ -111,6 +115,11 @@
   (corfu-auto t)
   (corfu-preselect-first nil)
   (corfu-cycle t)
+  (corfu-auto-prefix 2)
+  (corfu-auto-delay 0.0)
+  (corfu-quit-at-boundary t)
+  (corfu-echo-documentation 0.25)
+  (corfu-preview-current 'insert)
   :hook
   (minibuffer-setup . (lambda ()
                         (when (where-is-internal #'completion-at-point (list (current-local-map)))
