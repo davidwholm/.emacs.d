@@ -77,6 +77,8 @@
   (modus-themes-completions '((matches . (extrabold background intense))
 			      (selection . (semibold accented intense))
 			      (popup . (accented))))
+  (modus-themes-bold-constructs t)
+  (modus-themes-operandi-color-overrides '((bg-main . "#fefcf4")))
   :init
   (modus-themes-load-operandi))
 
@@ -258,7 +260,8 @@
 (use-package racket-mode
   :straight t
   :bind
-  ("C-c \\" . #'racket-insert-lambda))
+  (:map racket-mode-map
+        ("C-c \\" . #'racket-insert-lambda)))
 
 (use-package vundo
   :straight t)
