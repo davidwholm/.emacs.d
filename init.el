@@ -19,9 +19,22 @@
   :init
   (recentf-mode))
 
-(use-package display-line-numbers
-  :hook
-  (prog-mode . display-line-numbers-mode))
+(use-package blackout
+  :straight t)
+
+(use-package tuareg
+  :straight t)
+
+(use-package autorevert
+  :straight (:type built-in)
+  :blackout (auto-revert-mode))
+
+(use-package rust-mode
+  :straight t)
+
+(use-package hideshow
+  :straight (:type built-in)
+  :blackout (hs-minor-mode))
 
 (use-package elec-pair
   :hook
@@ -40,6 +53,23 @@
   :init
   (pixel-scroll-mode))
 
+(use-package window
+  :straight (:type built-in)
+  :config
+  (defun +window-size-% (&optional window frame)
+    (let ((frame-width (float (frame-width frame)))
+          (window-width (float (window-width window))))
+      (truncate (* 100 (/ window-width frame-width)))))
+  (defun +zoom-window-in/out (&optional window frame)
+    (interactive)
+    (if (<= (+window-size-% window frame) 50)
+        (maximize-window window)
+      (progn
+        (minimize-window window)
+        (other-window 1))))
+  :bind
+  ("C-c +" . #'+zoom-window-in/out))
+
 (use-package modus-themes
   :straight t
   :custom
@@ -48,27 +78,18 @@
 			      (selection . (semibold accented intense))
 			      (popup . (accented))))
   :init
-  (modus-themes-load-vivendi))
+  (modus-themes-load-operandi))
 
 (use-package so-long
   :init
   (global-so-long-mode))
 
-(use-package doom-modeline
-  :straight t
-  :custom
-  (doom-modeline-icon nil)
-  :init
-  (doom-modeline-mode))
-
 (use-package all-the-icons
   :straight t)
 
-(use-package tab-bar
-  :custom
-  (tab-bar-new-tab-choice "*scratch*")
-  :init
-  (tab-bar-mode))
+(use-package tab-modeline
+  :config
+  (tab-modeline-mode))
 
 (use-package comp
   :custom
@@ -76,10 +97,12 @@
 
 (use-package gcmh
   :straight t
+  :blackout
   :init
   (gcmh-mode))
 
 (use-package paren
+  :straight (:type built-in)
   :init
   (show-paren-mode t))
 
@@ -96,16 +119,40 @@
 
 (use-package consult
   :straight t
+  :config
+  (define-prefix-command '+consult-prefix-map)
   :bind
-  ([remap switch-to-buffer] . consult-buffer))
+  ([remap switch-to-buffer] . consult-buffer)
+  ("C-c c" . +consult-prefix-map)
+  (:map +consult-prefix-map
+        ("i" . #'consult-imenu)
+        ("I" . #'consult-imenu-multi)
+        ("l" . #'consult-line)
+        ("M-l" . #'consult-focus-lines)
+        ("M-L" . #'consult-keep-lines)
+        ("g" . #'consult-ripgrep)
+        ("G" . #'consult-git-grep)
+        ("f" . #'consult-find)
+        ("m" . #'consult-man)))
+
+(use-package eldoc
+  :straight (:type built-in)
+  :blackout)
 
 (use-package eglot
-  :straight t)
+  :straight t
+  :hook
+  (eglot-managed-mode . (lambda ()
+                          (setq-local eldoc-documentation-strategy #'eldoc-documentation-compose
+                                      eldoc-echo-area-use-multiline-p 5)))
+  :custom
+  (eglot-ignored-server-capabilities (list :documentHighlightProvider))
+  (eglot-autoshutdown t))
 
 (use-package flymake
   :straight t
   :custom
-  (flymake-fringe-indicator-position nil)
+  (flymake-no-changes-timeout 2)
   :hook
   (prog-mode . flymake-mode))
 
@@ -149,6 +196,17 @@
   :init
   (global-corfu-mode))
 
+(use-package cape
+  :straight t
+  :bind (("C-c p f" . cape-file)
+         ("C-c p l" . cape-line)
+         ("C-c p \\" . cape-tex)))
+
+(use-package dabbrev
+  ;; Swap M-/ and C-M-/
+  :bind (("M-/" . dabbrev-completion)
+         ("C-M-/" . dabbrev-expand)))
+
 (use-package marginalia
   :straight t
   :init
@@ -166,14 +224,8 @@
 (use-package cus-face
   :init
   (custom-set-faces
-   '(variable-pitch ((t (:family "Iosevka Aile" :height 160))))
-   '(default ((t (:family "Iosevka" :height 160))))))
-
-(use-package minions
-  :disabled
-  :straight t
-  :init
-  (minions-mode))
+   '(variable-pitch ((t (:family "Iosevka" :height 140))))
+   '(default ((t (:family "Iosevka" :height 140))))))
 
 (use-package cc-vars
   :custom
@@ -205,11 +257,14 @@
 
 (use-package racket-mode
   :straight t
-  :hook
-  (racket-mode . racket-xp-mode))
+  :bind
+  ("C-c \\" . #'racket-insert-lambda))
 
 (use-package vundo
   :straight t)
+
+(use-package tex
+  :straight auctex)
 
 (use-package org
   :straight t
@@ -271,21 +326,19 @@
   (magit-mode . magit-delta-mode))
 
 (custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
  '(bidi-display-reordering 'left-to-right t)
  '(cursor-in-non-selected-windows nil)
  '(highlight-nonselected-windows nil)
  '(inhbit-splash-screen t)
+ '(inhibit-startup-screen t)
  '(menu-bar-mode nil)
  '(org-fold-catch-invisible-edits 'show-and-error nil nil "Customized with use-package org")
  '(ring-bell-function 'ignore)
  '(safe-local-variable-values '((flycheck-clang-language-standard . "c++17")))
  '(tool-bar-mode nil)
  '(indent-tabs-mode nil)
- '(tab-always-indent 'complete)
+ ;;'(tab-always-indent 'complete)
+ '(blink-cursor-mode nil)
  '(truncate-lines t))
 
 (global-set-key (kbd "M-o") #'other-window)
