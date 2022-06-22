@@ -15,6 +15,11 @@
 
 (add-to-list 'load-path (concat user-emacs-directory "lisp"))
 
+(use-package expanded-minibuffer
+  :bind
+  (:map minibuffer-mode-map
+        ("C-c '" . #'expanded-minibuffer-mode-enter)))
+
 (use-package recentf
   :init
   (recentf-mode))
