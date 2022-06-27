@@ -16,6 +16,8 @@
 (add-to-list 'load-path (concat user-emacs-directory "lisp"))
 
 (use-package expanded-minibuffer
+  :custom
+  (enable-recursive-minibuffers t)
   :bind
   (:map minibuffer-mode-map
         ("C-c '" . #'expanded-minibuffer-mode-enter)))
@@ -78,11 +80,13 @@
 (use-package modus-themes
   :straight t
   :custom
-  (modus-themes-mode-line '(accented borderless))
+  (modus-themes-mode-line '(accented borderless 3d (padding . 2)))
   (modus-themes-completions '((matches . (extrabold background intense))
 			      (selection . (semibold accented intense))
 			      (popup . (accented))))
   (modus-themes-bold-constructs t)
+  (modus-themes-region '(accented bg-only no-extend))
+  (modus-themes-paren-match '(bold intense underline))
   (modus-themes-operandi-color-overrides '((bg-main . "#fefcf4")))
   :init
   (modus-themes-load-operandi))
@@ -126,7 +130,7 @@
 
 (use-package consult
   :straight t
-  :config
+  :init
   (define-prefix-command '+consult-prefix-map)
   :bind
   ([remap switch-to-buffer] . consult-buffer)
@@ -160,6 +164,7 @@
   :straight t
   :custom
   (flymake-no-changes-timeout 2)
+  (flymake-fringe-indicator-position nil)
   :hook
   (prog-mode . flymake-mode))
 
@@ -167,13 +172,13 @@
   :straight t
   :custom
   (corfu-auto t)
+  (corfu-auto-delay 0.2)
+  (corfu-auto-prefix 3)
+  (corfu-preview-current nil)
   (corfu-preselect-first nil)
   (corfu-cycle t)
-  (corfu-auto-prefix 2)
-  (corfu-auto-delay 0.0)
   (corfu-quit-at-boundary t)
-  (corfu-echo-documentation 0.25)
-  (corfu-preview-current 'insert)
+  (corfu-echo-documentation 0.2)
   :hook
   (minibuffer-setup . (lambda ()
                         (when (where-is-internal #'completion-at-point (list (current-local-map)))
@@ -185,9 +190,7 @@
   (advice-add #'corfu-insert :after (lambda (&rest _)
                                       (cond
                                        ((and (derived-mode-p 'eshell-mode) (fboundp 'eshell-send-input))
-                                        (eshell-send-input))
-                                       ((and (derived-mode-p 'comint-mode) (fboundp 'comint-send-input))
-                                        (comint-send-input)))))
+                                        (eshell-send-input)))))
   :bind
   (:map corfu-map
         ("TAB" . corfu-next)
@@ -254,7 +257,8 @@
 (use-package sly
   :straight t
   :custom
-  (inferior-lisp-program "sbcl"))
+  (inferior-lisp-program "sbcl")
+  (sly-symbol-completion-mode nil))
 
 (use-package geiser
   :straight t)
@@ -264,6 +268,8 @@
 
 (use-package racket-mode
   :straight t
+  :hook
+  (racket-mode . racket-xp-mode)
   :bind
   (:map racket-mode-map
         ("C-c \\" . #'racket-insert-lambda)))
@@ -345,8 +351,8 @@
  '(safe-local-variable-values '((flycheck-clang-language-standard . "c++17")))
  '(tool-bar-mode nil)
  '(indent-tabs-mode nil)
- ;;'(tab-always-indent 'complete)
  '(blink-cursor-mode nil)
+ ;; '(tab-always-indent 'complete)
  '(truncate-lines t))
 
 (global-set-key (kbd "M-o") #'other-window)

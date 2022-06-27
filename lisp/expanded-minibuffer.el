@@ -20,20 +20,30 @@ Then run it."
   (interactive)
   (expanded-minibuffer-mode-exit t))
 
-(defun expanded-minibuffer-mode-abort ()
-  "Just switch back to the minibuffer without altering its input."
+(defun expanded-minibuffer-mode-abort (&optional abort-minibuffer)
+  "Abort expanded-minibuffer and if ABORT-MINIBUFFER, minibuffer as well."
   (interactive)
   (kill-buffer-and-window)
-  (switch-to-minibuffer))
+  (switch-to-minibuffer)
+  (when abort-minibuffer
+    (abort-minibuffers)))
+
+(defun expanded-minibuffer-mode-abort&exit ()
+  "Abort expanded-minibuffer and minibuffer as well."
+  (interactive)
+  (expanded-minibuffer-mode-abort t))
 
 (defun expanded-minibuffer-mode-enter ()
   "Expand the current minibuffer with CONTENTS."
   (interactive)
   (let ((expanded-minibuffer-mode-buffer (get-buffer-create "*expanded-minibuffer*"))
         (contents (minibuffer-contents)))
-    (delete-minibuffer-contents)
     (switch-to-buffer-other-window expanded-minibuffer-mode-buffer)
     (expanded-minibuffer-mode)
+    (setq-local header-line-format
+	        (substitute-command-keys
+	         "Edit, then exit with `\\[expanded-minibuffer-mode-exit]'/`\\[expanded-minibuffer-mode-exit&run]', or abort \
+with `\\[expanded-minibuffer-mode-abort]'/`\\[expanded-minibuffer-mode-abort&exit]'"))
     (insert contents)))
 
 (define-derived-mode expanded-minibuffer-mode
@@ -44,7 +54,8 @@ will be put into the original minibuffer."
   :group '(convenience minibuffer)
   (define-key expanded-minibuffer-mode-map (kbd "C-c '") #'expanded-minibuffer-mode-exit)
   (define-key expanded-minibuffer-mode-map (kbd "C-c C-'") #'expanded-minibuffer-mode-exit&run)
-  (define-key expanded-minibuffer-mode-map (kbd "C-c C-k") #'expanded-minibuffer-mode-abort))
+  (define-key expanded-minibuffer-mode-map (kbd "C-c k") #'expanded-minibuffer-mode-abort)
+  (define-key expanded-minibuffer-mode-map (kbd "C-c C-k") #'expanded-minibuffer-mode-abort&exit))
 
 (provide 'expanded-minibuffer)
 ;;; expanded-minibuffer.el ends here
